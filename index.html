@@ -49,7 +49,7 @@
         const Edit = (props) => (<IconBase {...props}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></IconBase>);
         const X = (props) => (<IconBase {...props}><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></IconBase>);
 
-        // --- Pricing Database (Adjusted) ---
+        // --- Pricing Database (Adjusted 2->22, 3->13, 4->24, 5->55) ---
         const PRICE_DB = {
             'ex15-10': 138.0, 'base2-11': 70.0, 'ex6-15': 25.0, 'xy0-26': 30.13, 
             'base2-27': 55.0, 'base4-30': 55.0, 'col1-33': 25.0, 'gym1-33': 55.0, 
@@ -82,7 +82,7 @@
             'swshp-SWSH103': 55.0, 'xyp-XY122': 206.0, 'xyp-XY30': 55.0
         };
 
-        const STORAGE_KEY = 'tcg_binder_data_v14';
+        const STORAGE_KEY = 'tcg_binder_data_v15';
 
         const Modal = ({ isOpen, title, onClose, children }) => {
             if (!isOpen) return null;
@@ -114,6 +114,7 @@
             const [totalValue, setTotalValue] = useState(0);
             const [isSidebarOpen, setIsSidebarOpen] = useState(true);
             const [showHelp, setShowHelp] = useState(false);
+            const [storageWarning, setStorageWarning] = useState(null); // Storage Quota Warning
 
             // Modals
             const [confirmModal, setConfirmModal] = useState({ isOpen: false, message: '', onConfirm: null });
@@ -141,9 +142,20 @@
 
             useEffect(() => { fetchCards(pokemon); }, [pokemon]);
 
+            // Persistent Storage Logic with Quota Handling
             useEffect(() => {
-                const data = { pages: binderPages, customImages, pokemon, binderSize };
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                try {
+                    const data = { pages: binderPages, customImages, pokemon, binderSize };
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                    setStorageWarning(null); // Clear warning on success
+                } catch (e) {
+                    if (e.name === 'QuotaExceededError' || e.code === 22) {
+                        console.error("Storage Limit Reached", e);
+                        setStorageWarning("Storage full! Changes not saved. Try deleting custom images.");
+                    } else {
+                        console.error("Storage Error", e);
+                    }
+                }
                 
                 let val = 0;
                 binderPages.forEach(page => {
@@ -198,13 +210,48 @@
                 });
             };
 
+            // --- Optimized Image Upload with Compression ---
             const handleImageUpload = (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
+
+                // Simple size check upfront (e.g., 8MB limit)
+                if (file.size > 8 * 1024 * 1024) {
+                    alert("Image too large. Please upload images under 8MB.");
+                    return;
+                }
+
                 const reader = new FileReader();
-                reader.onloadend = () => { setCustomImages(prev => [...prev, { id: `custom-${Date.now()}`, content: reader.result }]); };
+                reader.onload = (event) => {
+                    // Create an off-screen image to resize/compress
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        // Resize constraint: Max width 1000px
+                        const MAX_WIDTH = 1000;
+                        if (width > MAX_WIDTH) {
+                            height = (MAX_WIDTH / width) * height;
+                            width = MAX_WIDTH;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Compress to JPEG with 0.7 quality to save space
+                        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                        
+                        setCustomImages(prev => [...prev, { id: `custom-${Date.now()}`, content: compressedDataUrl }]);
+                    };
+                    img.src = event.target.result;
+                };
                 reader.readAsDataURL(file);
             };
+
             const deleteCustomImage = (id) => { triggerConfirm("Delete this custom art?", () => { setCustomImages(prev => prev.filter(img => img.id !== id)); }); };
 
             const handleDragStart = (e, item) => { setDragItem(item); e.dataTransfer.effectAllowed = 'move'; };
@@ -273,10 +320,7 @@
                     if (colIndex > 0 && page.slots[i-1]?.type === 'biglax') continue;
                     const isBiglax = item?.type === 'biglax';
                     let spanClass = isBiglax ? 'col-span-2' : 'col-span-1';
-                    
-                    // FIXED: Biglax ratio set to 5/3 (1.67) to fit 1000x600 images perfectly
                     let aspectClass = isBiglax ? 'aspect-[5/3]' : 'aspect-[2.5/3.5]';
-                    
                     elements.push(
                         <div key={i} onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, page.id, i)} className={`relative border-2 border-dashed border-slate-700/50 rounded-lg flex items-center justify-center bg-slate-800/50 overflow-hidden transition-all ${spanClass} ${aspectClass} hover:bg-slate-700/50 hover:border-slate-500`}>
                             <span className="absolute text-3xl font-bold text-slate-800 select-none pointer-events-none z-0">{i + 1}</span>
@@ -452,6 +496,7 @@
                                 </div>
                             </div>
                             <div className="flex gap-4">
+                               {storageWarning && <div className="flex items-center gap-2 text-yellow-400 text-xs animate-pulse bg-yellow-900/30 px-3 py-1 rounded-full"><AlertCircle size={14} /> {storageWarning}</div>}
                                {errorMsg && <div className="flex items-center gap-2 text-red-400 text-sm animate-pulse font-medium bg-red-900/20 px-3 py-1 rounded-full"><AlertCircle size={16} /> {errorMsg}</div>}
                                <button onClick={() => setShowHelp(true)} className="p-2 text-slate-400 hover:text-teal-400 transition-colors" title="Help"><HelpCircle size={20}/></button>
                                <button onClick={addSpread} className="flex items-center gap-2 text-sm bg-teal-700 hover:bg-teal-600 text-white px-4 py-1.5 rounded-md shadow-lg transition-all hover:translate-y-[-1px]"><Plus size={16} /> Add Pages</button>
