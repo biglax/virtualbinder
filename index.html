@@ -49,7 +49,7 @@
         const Edit = (props) => (<IconBase {...props}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></IconBase>);
         const X = (props) => (<IconBase {...props}><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></IconBase>);
 
-        // --- Pricing Database (With your requested adjustments) ---
+        // --- Pricing Database (Adjusted) ---
         const PRICE_DB = {
             'ex15-10': 138.0, 'base2-11': 70.0, 'ex6-15': 25.0, 'xy0-26': 30.13, 
             'base2-27': 55.0, 'base4-30': 55.0, 'col1-33': 25.0, 'gym1-33': 55.0, 
@@ -82,7 +82,7 @@
             'swshp-SWSH103': 55.0, 'xyp-XY122': 206.0, 'xyp-XY30': 55.0
         };
 
-        const STORAGE_KEY = 'tcg_binder_data_v13';
+        const STORAGE_KEY = 'tcg_binder_data_v14';
 
         const Modal = ({ isOpen, title, onClose, children }) => {
             if (!isOpen) return null;
@@ -273,7 +273,10 @@
                     if (colIndex > 0 && page.slots[i-1]?.type === 'biglax') continue;
                     const isBiglax = item?.type === 'biglax';
                     let spanClass = isBiglax ? 'col-span-2' : 'col-span-1';
-                    let aspectClass = isBiglax ? 'aspect-[5.2/3.5]' : 'aspect-[2.5/3.5]';
+                    
+                    // FIXED: Biglax ratio set to 5/3 (1.67) to fit 1000x600 images perfectly
+                    let aspectClass = isBiglax ? 'aspect-[5/3]' : 'aspect-[2.5/3.5]';
+                    
                     elements.push(
                         <div key={i} onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, page.id, i)} className={`relative border-2 border-dashed border-slate-700/50 rounded-lg flex items-center justify-center bg-slate-800/50 overflow-hidden transition-all ${spanClass} ${aspectClass} hover:bg-slate-700/50 hover:border-slate-500`}>
                             <span className="absolute text-3xl font-bold text-slate-800 select-none pointer-events-none z-0">{i + 1}</span>
