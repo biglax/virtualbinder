@@ -1,23 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TCG Binder Planner - README</title>
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
-        h1, h2, h3 { color: #2c3e50; margin-top: 24px; }
-        code { background-color: #f1f1f1; padding: 2px 4px; border-radius: 4px; font-family: monospace; }
-        ul, ol { padding-left: 24px; }
-        li { margin-bottom: 8px; }
-        a { color: #0366d6; text-decoration: none; }
-        a:hover { text-decoration: underline; }
-        hr { border: 0; border-top: 1px solid #eaecef; margin: 24px 0; }
-        footer { color: #666; font-style: italic; }
-    </style>
-</head>
-<body>
-
     <h1>📒 TCG Binder Planner</h1>
 
     <p>A web-based tool for planning Pokémon TCG binder layouts. Designed specifically for collectors to visualize their <strong>Snorlax</strong> and <strong>Blastoise</strong> collections before sleeving them up.</p>
