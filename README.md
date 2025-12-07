@@ -52,9 +52,3 @@
         <li>🗃️ <strong>TCGDex API:</strong> For fetching official card data and images.</li>
     </ul>
 
-    <hr>
-
-    <footer>😴 Built for the ultimate Snorlax collector.</footer>
-
-</body>
-</html>
