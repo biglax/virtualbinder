@@ -1,7 +1,7 @@
 <h1>📒 TCG Binder Planner</h1>
 
 <p class="cta-link">
-        <a href="https://your-username.github.io/tcg-planner/">🔗 Launch TCG Binder Planner</a>
+        <a href="https://biglax.github.io/virtualbinder/">🔗 Launch TCG Binder Planner</a>
     </p>
 
 <p>A web-based tool for planning Pokémon TCG binder layouts. Designed specifically for collectors to visualize their <strong>Snorlax</strong> and <strong>Blastoise</strong> collections before sleeving them up.</p>
